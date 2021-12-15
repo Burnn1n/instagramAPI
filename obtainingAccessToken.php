@@ -1,5 +1,18 @@
 <?php
     include 'defines.php';
+    if(isset( $_GET['userid'] )){
+        $_SESSION["userid"] = $_GET['userid'];
+    }
+    if(isset($_SESSION["userid"])){
+        $userid = $_SESSION["userid"];
+    }
+    $servername = "localhost";
+$username = "root";
+$password = "1234";
+$dbname = "loginsystem";
+$conn = mysqli_connect($servername, $username, $password, $dbname);
+
+
 
     // load graph-sdk files
     require_once __DIR__ . '/vendor/autoload.php';
@@ -40,18 +53,32 @@
 
         echo '<pre>';
         var_dump( $accessToken );
-
+        
         $accessToken = (string) $accessToken;
+        $_SESSION["accessToken"] = (string) $accessToken;
+        //database ruu access token-g oruulah
+        $sql = "UPDATE users
+        SET access_token = '$accessToken'
+        WHERE id = '$userid';";
+        mysqli_query($conn,$sql);
         echo '<h1>Long Lived Access Token</h1>';
         print_r( $accessToken );
+        echo '<a href="https://localhost:3000/admin">
+            Админ хуудас руу буцах
+    </a>';
+    header("Location: http://localhost/projects/fbToken/get_instagram_account_id.php");
+    die();
     } else { // display login url
         $permissions = [
             'public_profile', 
             'instagram_basic', 
-            'pages_show_list'
+            'pages_show_list', 
+            'instagram_manage_insights', 
+            'instagram_manage_comments', 
         ];
         $loginUrl = $helper->getLoginUrl( FACEBOOK_REDIRECT_URI, $permissions );
-    
+        header("Location:".$loginUrl);
+        die();
         echo '<a href="' . $loginUrl . '">
             Login With Facebook
         </a>';
